@@ -1,0 +1,1845 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fombegen</title>
+    <meta name="description"
+        content="Interactive FMBE (Fake Multi-Block Entity) function generator for Minecraft Bedrock Edition">
+    <!-- Favicon (place your provided image in the project root as 'fombegen-favicon.png') -->
+    <link rel="icon" href="fombegen-logo-clean.png" type="image/png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <style>
+        *,
+        *::before,
+        *::after {
+            margin: 0;  
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #111111;
+            --bg-tertiary: #1a1a1a;
+            --bg-elevated: #222222;
+            --accent: #4ade80;
+            --accent-hover: #22c55e;
+            --accent-glow: rgba(74, 222, 128, 0.15);
+            --text-primary: #fafafa;
+            --text-secondary: #a3a3a3;
+            --text-muted: #737373;
+            --border: #2a2a2a;
+            --border-hover: #3a3a3a;
+            --code-bg: #0d0d0d;
+            --danger: #ef4444;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .bg-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image:
+                linear-gradient(rgba(74, 222, 128, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(74, 222, 128, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .bg-glow {
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(ellipse at 30% 20%, rgba(74, 222, 128, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 70% 80%, rgba(34, 197, 94, 0.05) 0%, transparent 40%);
+            pointer-events: none;
+            z-index: 0;
+            animation: float 20s ease-in-out infinite;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translate(0, 0) rotate(0deg);
+            }
+
+            33% {
+                transform: translate(2%, 1%) rotate(1deg);
+            }
+
+            66% {
+                transform: translate(-1%, 2%) rotate(-1deg);
+            }
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding-bottom: 2rem;
+            position: relative;
+        }
+
+        header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+        }
+
+        .logo {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, var(--accent) 0%, #22c55e 100%);
+            border-radius: 16px;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 8px 32px rgba(74, 222, 128, 0.3);
+            animation: pulse-shadow 3s ease-in-out infinite;
+        }
+
+        @keyframes pulse-shadow {
+
+            0%,
+            100% {
+                box-shadow: 0 8px 32px rgba(74, 222, 128, 0.3);
+            }
+
+            50% {
+                box-shadow: 0 12px 48px rgba(74, 222, 128, 0.4);
+            }
+        }
+
+        .logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 12px;
+            display: block;
+        }
+
+        header h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent) 0%, #86efac 50%, #22c55e 100%);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.75rem;
+            animation: gradient-shift 4s ease infinite;
+        }
+
+        @keyframes gradient-shift {
+
+            0%,
+            100% {
+                background-position: 0% center;
+            }
+
+            50% {
+                background-position: 100% center;
+            }
+        }
+
+        header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        header .subtitle {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+            padding: 0.5rem 1rem;
+            background: var(--bg-tertiary);
+            border-radius: 100px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        header .subtitle a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        header .subtitle a:hover {
+            color: #86efac;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        @media (max-width: 1200px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .panel {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+            transition: border-color 0.3s;
+        }
+
+        .panel:hover {
+            border-color: var(--border-hover);
+        }
+
+        .panel-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem 1.5rem;
+            background: var(--bg-tertiary);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .panel-header .icon {
+            width: 20px;
+            height: 20px;
+            color: var(--accent);
+        }
+
+        .panel-header h2 {
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .panel-body {
+            padding: 1.5rem;
+        }
+
+        .form-section {
+            margin-bottom: 1.75rem;
+        }
+
+        .form-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .form-section-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 0.75px;
+            margin-bottom: 1rem;
+        }
+
+        .form-section-title::before {
+            content: '';
+            width: 4px;
+            height: 4px;
+            background: var(--accent);
+            border-radius: 50%;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-group label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        input[type="text"],
+        select {
+            width: 100%;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 0.75rem 1rem;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+
+        input[type="text"]:hover,
+        select:hover {
+            border-color: var(--border-hover);
+        }
+
+        input[type="text"]:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23a3a3a3' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 36px;
+        }
+
+        .range-slider {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .range-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .range-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .range-value {
+            display: inline-flex;
+            min-width: 50px;
+            padding: 0.25rem 0.5rem;
+            background: var(--bg-elevated);
+            border-radius: 6px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            text-align: center;
+            color: var(--accent);
+            font-weight: 500;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            background: var(--bg-tertiary);
+            border-radius: 3px;
+            appearance: none;
+            cursor: pointer;
+        }
+
+        input[type="range"]:hover {
+            background: var(--bg-elevated);
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            background: var(--accent);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 2px 8px rgba(74, 222, 128, 0.3);
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.15);
+            box-shadow: 0 4px 12px rgba(74, 222, 128, 0.4);
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .reset-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.25rem;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .reset-btn:hover {
+            border-color: var(--danger);
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        .reset-btn svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .preset-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.75rem;
+        }
+
+        @media (max-width: 600px) {
+            .preset-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .preset-btn {
+            padding: 0.75rem 0.5rem;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .preset-btn:hover {
+            border-color: var(--accent);
+            background: var(--accent-glow);
+            color: var(--text-primary);
+        }
+
+        .preset-btn.active {
+            border-color: var(--accent);
+            background: var(--accent-glow);
+            color: var(--accent);
+        }
+
+        .preset-btn .preset-icon {
+            width: 20px;
+            height: 20px;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+
+        .preset-btn:hover .preset-icon,
+        .preset-btn.active .preset-icon {
+            opacity: 1;
+        }
+
+        .info-box {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            padding: 1rem;
+            background: var(--accent-glow);
+            border: 1px solid rgba(74, 222, 128, 0.2);
+            border-radius: 10px;
+            margin-top: 1rem;
+        }
+
+        .info-box .info-icon {
+            width: 18px;
+            height: 18px;
+            color: var(--accent);
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .info-box p {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .info-box code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            background: var(--bg-elevated);
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            color: var(--accent);
+        }
+
+        /* 3D Preview */
+        .preview-container {
+            height: 380px;
+            background: var(--bg-tertiary);
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+            cursor: grab;
+            perspective: 1000px;
+        }
+
+        .preview-container:active {
+            cursor: grabbing;
+        }
+
+        .preview-grid {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%) rotateX(60deg);
+            width: 350px;
+            height: 350px;
+            background-image:
+                linear-gradient(rgba(74, 222, 128, 0.25) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(74, 222, 128, 0.25) 1px, transparent 1px);
+            background-size: 35px 35px;
+            opacity: 0.6;
+        }
+
+        .preview-block {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform-style: preserve-3d;
+            transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-origin: center center;
+        }
+
+        .block-face {
+            position: absolute;
+            width: 70px;
+            height: 70px;
+            border: 2px solid rgba(74, 222, 128, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.6rem;
+            font-weight: 500;
+            color: rgba(74, 222, 128, 0.9);
+            backface-visibility: visible;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .block-face.front {
+            transform: translateZ(35px);
+            background: rgba(74, 222, 128, 0.2);
+        }
+
+        .block-face.back {
+            transform: rotateY(180deg) translateZ(35px);
+            background: rgba(74, 222, 128, 0.15);
+        }
+
+        .block-face.left {
+            transform: rotateY(-90deg) translateZ(35px);
+            background: rgba(74, 222, 128, 0.12);
+        }
+
+        .block-face.right {
+            transform: rotateY(90deg) translateZ(35px);
+            background: rgba(74, 222, 128, 0.18);
+        }
+
+        .block-face.top {
+            transform: rotateX(90deg) translateZ(35px);
+            background: rgba(74, 222, 128, 0.25);
+        }
+
+        .block-face.bottom {
+            transform: rotateX(-90deg) translateZ(35px);
+            background: rgba(74, 222, 128, 0.1);
+        }
+
+        .preview-label {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            padding: 0.5rem 0.75rem;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .preview-label .dot {
+            width: 8px;
+            height: 8px;
+            background: var(--accent);
+            border-radius: 50%;
+        }
+
+        .preview-label .dot.animated {
+            animation: blink 2s ease-in-out infinite;
+        }
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.4;
+            }
+        }
+
+        /* Value Overlay */
+        .value-overlay {
+            position: absolute;
+            top: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            pointer-events: auto;
+            margin-top: 3rem;
+            justify-content: center;
+            z-index: 2;
+        }
+
+        .value-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.35rem 0.6rem;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(74, 222, 128, 0.3);
+            border-radius: 6px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            cursor: pointer;
+        }
+
+        .value-badge:hover {
+            background: rgba(74, 222, 128, 0.06);
+            border-color: rgba(74, 222, 128, 0.45);
+        }
+
+        .value-badge .label {
+            color: var(--text-muted);
+        }
+
+        .value-badge .value {
+            color: var(--accent);
+            font-weight: 500;
+        }
+
+        .value-input {
+            background: transparent;
+            border: 1px solid rgba(74, 222, 128, 0.25);
+            color: var(--accent);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            outline: none;
+            min-width: 48px;
+            text-align: center;
+        }
+
+        .animation-indicator {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            padding: 0.5rem 0.75rem;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            border: 1px solid var(--accent);
+            border-radius: 8px;
+            font-size: 0.75rem;
+            color: var(--accent);
+            display: none;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .animation-indicator.visible {
+            display: flex;
+        }
+
+        .animation-indicator .playing {
+            width: 12px;
+            height: 12px;
+            border: 2px solid var(--accent);
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .preview-controls {
+            position: absolute;
+            bottom: 1rem;
+            right: 1rem;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .preview-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.5rem 0.75rem;
+            color: var(--text-primary);
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .preview-btn:hover {
+            border-color: var(--accent);
+            background: var(--accent-glow);
+        }
+
+        .preview-btn svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .preview-btn.active {
+            border-color: var(--accent);
+            background: var(--accent-glow);
+            color: var(--accent);
+        }
+
+        /* Code Output */
+        .code-container {
+            background: var(--code-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            background: var(--bg-tertiary);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .code-header .label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .code-header .label svg {
+            width: 16px;
+            height: 16px;
+            color: var(--accent);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .action-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border: none;
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .copy-btn {
+            background: var(--accent);
+            color: var(--bg-primary);
+        }
+
+        .copy-btn:hover {
+            background: var(--accent-hover);
+            transform: translateY(-1px);
+        }
+
+        .copy-btn.copied {
+            background: #86efac;
+        }
+
+        .download-btn {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .download-btn:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+        }
+
+        .action-btn svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .code-content {
+            padding: 1rem;
+            max-height: 450px;
+            overflow-y: auto;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            line-height: 1.8;
+        }
+
+        .code-content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .code-content::-webkit-scrollbar-track {
+            background: var(--bg-tertiary);
+        }
+
+        .code-content::-webkit-scrollbar-thumb {
+            background: var(--border-hover);
+            border-radius: 3px;
+        }
+
+        .command-line {
+            margin-bottom: 0.75rem;
+            padding: 0.6rem 0.75rem;
+            background: var(--bg-tertiary);
+            border-radius: 6px;
+            border-left: 3px solid var(--accent);
+            transition: background 0.2s;
+        }
+
+        .command-line:hover {
+            background: var(--bg-elevated);
+        }
+
+        .command-line:last-child {
+            margin-bottom: 0;
+        }
+
+        .command-comment {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .command-code {
+            color: var(--accent);
+            word-break: break-all;
+        }
+
+        .explanation {
+            margin-top: 1.5rem;
+            padding: 1.25rem;
+            background: var(--bg-tertiary);
+            border-radius: 12px;
+            border-left: 3px solid var(--accent);
+        }
+
+        .explanation h4 {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--accent);
+            margin-bottom: 1rem;
+        }
+
+        .explanation h4 svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .explanation p {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.75rem;
+            line-height: 1.6;
+        }
+
+        .explanation p:last-child {
+            margin-bottom: 0;
+        }
+
+        .explanation code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            background: var(--bg-elevated);
+            padding: 0.15rem 0.5rem;
+            border-radius: 4px;
+            color: var(--accent);
+        }
+
+        .explanation strong {
+            color: var(--text-primary);
+        }
+
+        .explanation .tag {
+            display: inline-block;
+            padding: 0.15rem 0.5rem;
+            background: var(--accent-glow);
+            border-radius: 4px;
+            font-size: 0.75rem;
+            color: var(--accent);
+            margin-right: 0.25rem;
+        }
+
+        footer {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+            text-align: center;
+        }
+
+        footer p {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        footer a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            color: #86efac;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .slide-up {
+            animation: slideUp 0.4s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            header h1 {
+                font-size: 2rem;
+            }
+
+            .panel-body {
+                padding: 1rem;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .preset-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .preview-container {
+                height: 300px;
+            }
+
+            .value-overlay {
+                margin-top: 2.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="bg-grid"></div>
+    <div class="bg-glow"></div>
+
+    <div class="container">
+        <header class="fade-in">
+            <div class="logo">
+                <!-- Replace 'fombegen-logo.png' with the provided image file in the project root -->
+                <img src="fombegen-logo-clean.png" alt="Fombegen logo">
+            </div>
+            <h1>Fombegen</h1>
+            <p>Fake Multi-Block Entity creator for Minecraft Bedrock Edition</p>
+            <div class="subtitle">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="12" y1="16" x2="12" y2="12" />
+                    <line x1="12" y1="8" x2="12.01" y2="8" />
+                </svg>
+                Based on <a href="https://wiki.bedrock.dev/commands/display-entities#simplified-fmbe" target="_blank"
+                    rel="noopener">Bedrock Wiki - Simplified FMBE</a>
+            </div>
+        </header>
+
+        <div class="main-grid">
+            <div class="left-column">
+                <div class="panel slide-up" style="animation-delay: 0.1s">
+                    <div class="panel-header">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="3" />
+                            <path
+                                d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                        </svg>
+                        <h2>Configuration</h2>
+                    </div>
+                    <div class="panel-body">
+                        <div class="form-section">
+                            <div class="form-section-title">Entity Settings</div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Entity Tag</label>
+                                    <input type="text" id="entityTag" value="wiki:fmbe" placeholder="namespace:tag">
+                                </div>
+                                <div class="form-group">
+                                    <label>Item / Block ID</label>
+                                    <input type="text" id="itemId" value="minecraft:stone"
+                                        placeholder="minecraft:item_id">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-section">
+                            <div class="form-section-title">Position (1/16 block units)</div>
+                            <div class="form-row">
+                                <div class="form-group range-slider">
+                                    <div class="range-header">
+                                        <span class="range-label">X</span>
+                                        <span class="range-value" id="xposValue">0</span>
+                                    </div>
+                                    <input type="range" id="xpos" min="-32" max="32" value="0" step="1">
+                                </div>
+                                <div class="form-group range-slider">
+                                    <div class="range-header">
+                                        <span class="range-label">Y</span>
+                                        <span class="range-value" id="yposValue">0</span>
+                                    </div>
+                                    <input type="range" id="ypos" min="-32" max="32" value="0" step="1">
+                                </div>
+                                <div class="form-group range-slider">
+                                    <div class="range-header">
+                                        <span class="range-label">Z</span>
+                                        <span class="range-value" id="zposValue">0</span>
+                                    </div>
+                                    <input type="range" id="zpos" min="-32" max="32" value="0" step="1">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-section">
+                            <div class="form-section-title">Rotation (degrees)</div>
+                            <div class="form-row">
+                                <div class="form-group range-slider">
+                                    <div class="range-header">
+                                        <span class="range-label">X</span>
+                                        <span class="range-value" id="xrotValue">0</span>
+                                    </div>
+                                    <input type="range" id="xrot" min="-180" max="180" value="0" step="1">
+                                </div>
+                                <div class="form-group range-slider">
+                                    <div class="range-header">
+                                        <span class="range-label">Y</span>
+                                        <span class="range-value" id="yrotValue">0</span>
+                                    </div>
+                                    <input type="range" id="yrot" min="-180" max="180" value="0" step="1">
+                                </div>
+                                <div class="form-group range-slider">
+                                    <div class="range-header">
+                                        <span class="range-label">Z</span>
+                                        <span class="range-value" id="zrotValue">0</span>
+                                    </div>
+                                    <input type="range" id="zrot" min="-180" max="180" value="0" step="1">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-section">
+                            <div class="form-section-title">Scale</div>
+                            <div class="form-row">
+                                <div class="form-group range-slider">
+                                    <div class="range-header">
+                                        <span class="range-label">Overall Scale</span>
+                                        <span class="range-value" id="scaleValue">1.0</span>
+                                    </div>
+                                    <input type="range" id="scale" min="0.1" max="10" value="1" step="0.1">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-section">
+                            <div class="form-section-title">Base Position (offset preserves rotation center)</div>
+                            <div class="form-row">
+                                <div class="form-group range-slider">
+                                    <div class="range-header">
+                                        <span class="range-label">X Base</span>
+                                        <span class="range-value" id="xbaseposValue">0</span>
+                                    </div>
+                                    <input type="range" id="xbasepos" min="-32" max="32" value="0" step="1">
+                                </div>
+                                <div class="form-group range-slider">
+                                    <div class="range-header">
+                                        <span class="range-label">Y Base</span>
+                                        <span class="range-value" id="ybaseposValue">0</span>
+                                    </div>
+                                    <input type="range" id="ybasepos" min="-32" max="32" value="0" step="1">
+                                </div>
+                                <div class="form-group range-slider">
+                                    <div class="range-header">
+                                        <span class="range-label">Z Base</span>
+                                        <span class="range-value" id="zbaseposValue">0</span>
+                                    </div>
+                                    <input type="range" id="zbasepos" min="-32" max="32" value="0" step="1">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="btn-row">
+                            <button class="reset-btn" id="resetAll">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                                    <path d="M3 3v5h5" />
+                                </svg>
+                                Reset All Values
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel slide-up" style="animation-delay: 0.2s; margin-top: 1.5rem;">
+                    <div class="panel-header">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 3v18" />
+                            <path d="M5.5 8.5L12 3l6.5 5.5" />
+                            <path d="M5.5 15.5L12 21l6.5-5.5" />
+                        </svg>
+                        <h2>Animation Presets</h2>
+                    </div>
+                    <div class="panel-body">
+                        <div class="preset-grid">
+                            <button class="preset-btn active" data-preset="none">
+                                <svg class="preset-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <circle cx="12" cy="12" r="10" />
+                                    <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
+                                </svg>
+                                None
+                            </button>
+                            <button class="preset-btn" data-preset="spin">
+                                <svg class="preset-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+                                    <polyline points="21 3 21 9 15 9" />
+                                </svg>
+                                Spin
+                            </button>
+                            <button class="preset-btn" data-preset="bob">
+                                <svg class="preset-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M12 5v14" />
+                                    <path d="M19 12H5" />
+                                </svg>
+                                Bob
+                            </button>
+                            <button class="preset-btn" data-preset="pulse">
+                                <svg class="preset-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <circle cx="12" cy="12" r="4" />
+                                    <circle cx="12" cy="12" r="8" stroke-dasharray="4 4" />
+                                </svg>
+                                Pulse
+                            </button>
+                            <button class="preset-btn" data-preset="wobble">
+                                <svg class="preset-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M2 12c2-4 6-4 10 0s8 4 10 0" />
+                                </svg>
+                                Wobble
+                            </button>
+                            <button class="preset-btn" data-preset="orbit">
+                                <svg class="preset-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <circle cx="12" cy="12" r="3" />
+                                    <circle cx="12" cy="12" r="8" stroke-dasharray="6 3" />
+                                </svg>
+                                Orbit
+                            </button>
+                            <button class="preset-btn" data-preset="float">
+                                <svg class="preset-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M12 3v18" />
+                                    <path d="M8 7l4-4 4 4" />
+                                    <path d="M8 17l4 4 4-4" />
+                                </svg>
+                                Float
+                            </button>
+                            <button class="preset-btn" data-preset="shake">
+                                <svg class="preset-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M4 12h2" />
+                                    <path d="M18 12h2" />
+                                    <path d="M11 6h2" />
+                                    <path d="M11 18h2" />
+                                </svg>
+                                Shake
+                            </button>
+                        </div>
+                        <div class="info-box">
+                            <svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <circle cx="12" cy="12" r="10" />
+                                <line x1="12" y1="16" x2="12" y2="12" />
+                                <line x1="12" y1="8" x2="12.01" y2="8" />
+                            </svg>
+                            <p>Animation presets are previewed in real-time above! The generated commands use
+                                <code>q.life_time</code> for continuous motion.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="right-column">
+                <div class="panel slide-up" style="animation-delay: 0.15s">
+                    <div class="panel-header">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path
+                                d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+                        </svg>
+                        <h2>3D Preview</h2>
+                    </div>
+                    <div class="panel-body" style="padding: 0;">
+                        <div class="preview-container" id="previewContainer">
+                            <div class="preview-label">
+                                <span class="dot" id="previewDot"></span>
+                                <span id="previewStatus">Real-time Preview</span>
+                            </div>
+                            <div class="value-overlay" id="valueOverlay"></div>
+                            <div class="animation-indicator" id="animationIndicator">
+                                <div class="playing"></div>
+                                <span id="animationName">spin</span>
+                            </div>
+                            <div class="preview-grid"></div>
+                            <div class="preview-block" id="previewBlock">
+                                <div class="block-face front">front</div>
+                                <div class="block-face back">back</div>
+                                <div class="block-face left">left</div>
+                                <div class="block-face right">right</div>
+                                <div class="block-face top">top</div>
+                                <div class="block-face bottom">bottom</div>
+                            </div>
+                            <div class="preview-controls">
+                                <button class="preview-btn" id="resetView" title="Reset View">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                                        <path d="M3 3v5h5" />
+                                    </svg>
+                                </button>
+                                <button class="preview-btn" id="toggleSpin" title="Auto-Rotate View">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                        id="playIcon">
+                                        <polygon points="5 3 19 12 5 21 5 3" />
+                                    </svg>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                        id="pauseIcon" style="display: none;">
+                                        <rect x="6" y="4" width="4" height="16" />
+                                        <rect x="14" y="4" width="4" height="16" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel slide-up" style="animation-delay: 0.25s; margin-top: 1.5rem;">
+                    <div class="panel-header">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="16 18 22 12 16 6" />
+                            <polyline points="8 6 2 12 8 18" />
+                        </svg>
+                        <h2>Generated Commands</h2>
+                    </div>
+                    <div class="panel-body">
+                        <div class="code-container">
+                            <div class="code-header">
+                                <div class="label">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                                        <polyline points="14 2 14 8 20 8" />
+                                    </svg>
+                                    Simplified FMBE
+                                </div>
+                                <div class="btn-group">
+                                    <button class="action-btn download-btn" id="downloadBtn">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                            <polyline points="7 10 12 15 17 10" />
+                                            <line x1="12" y1="15" x2="12" y2="3" />
+                                        </svg>
+                                        Download .mcfunction
+                                    </button>
+                                    <button class="action-btn copy-btn" id="copyBtn">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                                        </svg>
+                                        Copy
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="code-content" id="commandOutput"></div>
+                        </div>
+
+                        <div class="explanation" id="explanationSection">
+                            <h4>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10" />
+                                    <line x1="12" y1="16" x2="12" y2="12" />
+                                    <line x1="12" y1="8" x2="12.01" y2="8" />
+                                </svg>
+                                About Simplified FMBE
+                            </h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>Based on <a href="https://wiki.bedrock.dev/commands/display-entities#simplified-fmbe" target="_blank"
+                    rel="noopener noreferrer">Bedrock Wiki - Simplified FMBE</a></p>
+        </footer>
+    </div>
+
+    <script>
+        // Default values
+        const defaults = {
+            preset: 'none',
+            entityTag: 'wiki:fmbe',
+            itemId: 'minecraft:stone',
+            xpos: 0, ypos: 0, zpos: 0,
+            xrot: 0, yrot: 0, zrot: 0,
+            scale: 1,
+            xbasepos: 0, ybasepos: 0, zbasepos: 0
+        };
+
+        // State
+        const state = { ...defaults, autoRotate: false, viewRotation: { x: -20, y: 45 }, animationTime: 0 };
+
+        // Animation state for preview
+        const animState = { xpos: 0, ypos: 0, zpos: 0, xrot: 0, yrot: 0, zrot: 0, scale: 1 };
+
+        // DOM elements
+        let elements = {};
+        let valueDisplays = {};
+
+        function init() {
+            const inputs = ['entityTag', 'itemId', 'xpos', 'ypos', 'zpos', 'xrot', 'yrot', 'zrot', 'scale', 'xbasepos', 'ybasepos', 'zbasepos'];
+            inputs.forEach(id => { elements[id] = document.getElementById(id); });
+
+            ['xpos', 'ypos', 'zpos', 'xrot', 'yrot', 'zrot', 'scale', 'xbasepos', 'ybasepos', 'zbasepos'].forEach(id => {
+                valueDisplays[id] = document.getElementById(id + 'Value');
+            });
+
+            elements.previewBlock = document.getElementById('previewBlock');
+            elements.commandOutput = document.getElementById('commandOutput');
+            elements.copyBtn = document.getElementById('copyBtn');
+            elements.downloadBtn = document.getElementById('downloadBtn');
+            elements.resetAll = document.getElementById('resetAll');
+            elements.explanationSection = document.getElementById('explanationSection');
+            elements.previewContainer = document.getElementById('previewContainer');
+            elements.resetView = document.getElementById('resetView');
+            elements.toggleSpin = document.getElementById('toggleSpin');
+            elements.playIcon = document.getElementById('playIcon');
+            elements.pauseIcon = document.getElementById('pauseIcon');
+            elements.previewDot = document.getElementById('previewDot');
+            elements.previewStatus = document.getElementById('previewStatus');
+            elements.animationIndicator = document.getElementById('animationIndicator');
+            elements.animationName = document.getElementById('animationName');
+            elements.valueOverlay = document.getElementById('valueOverlay');
+
+            bindEvents();
+            updateOutput();
+            startAnimationLoop();
+
+            // Attach click handler for editable badges in the preview overlay
+            if (elements.valueOverlay) {
+                elements.valueOverlay.addEventListener('click', handleValueBadgeClick);
+            }
+        }
+
+        function generateSimplifiedCommands() {
+            const tag = state.entityTag;
+            const s = state.scale.toFixed(1);
+
+            const cmd1 = `playanimation @e[tag=${tag}] animation.player.sleeping none 0 "v.scale=${s};v.adscale=math.sqrt(v.scale);v.adscaled=2.1385*v.adscale;v.xbasepos=${state.xbasepos};v.ybasepos=${state.ybasepos};v.zbasepos=${state.zbasepos};v.xpos=${state.xpos};v.ypos=${state.ypos};v.zpos=${state.zpos};v.xrot=q.life_time*0+${state.xrot};v.yrot=q.life_time*0+${state.yrot};v.zrot=q.life_time*0+${state.zrot};v.swelling_scale1=v.adscaled;v.swelling_scale2=v.adscaled;" controller.animation.fox.move`;
+
+            const cmd2 = `playanimation @e[tag=${tag}] animation.ender_dragon.neck_head_movement none 0 "v.adjust_xz=8*v.adscaled+v.zbasepos/v.adscaled;v.adjust_y=(-5-v.ybasepos/v.adscaled/v.adscaled)*v.adscaled;v.x=v.xbasepos/v.adscaled;v.y=v.adjust_y;v.z=v.adjust_xz;v.ty=v.y*math.cos(v.xrot)-v.z*math.sin(v.xrot);v.tz=v.y*math.sin(v.xrot)+v.z*math.cos(v.xrot);v.y=v.ty;v.z=v.tz;v.tx=-v.x*math.cos(v.zrot)+v.y*math.sin(v.zrot);v.ty=v.x*math.sin(v.zrot)+v.y*math.cos(v.zrot);v.x=v.tx;v.y=v.ty;v.tx=v.x*math.cos(v.yrot)+v.z*math.sin(v.yrot);v.tz=-v.x*math.sin(v.yrot)+v.z*math.cos(v.yrot);v.x=v.tx;v.z=v.tz;v.head_position_x=v.x+v.xpos/v.adscaled;v.head_position_y=7.48/v.adscale+v.z+v.zpos/v.adscaled;v.head_position_z=v.y-v.ypos/v.adscaled;v.head_rotation_x=90+v.xrot;v.head_rotation_y=v.zrot;v.head_rotation_z=v.yrot;" wiki.posrot`;
+
+            return [
+                { comment: '### Summon the FMBE entity (fox) ###', code: `summon fox ~~~ ~ ~ minecraft:as_adult "${tag}"` },
+                { comment: '### Set the item/block model in fox main hand ###', code: `replaceitem entity @e[tag=${tag}] slot.weapon.mainhand 0 ${state.itemId}` },
+                { comment: '### [1] Initialize FMBE variables and scale ###', code: cmd1 },
+                { comment: '### [2] Define FMBE position & rotation ###', code: cmd2 }
+            ];
+        }
+
+        function generateAnimationCommands() {
+            const tag = state.entityTag;
+            const t = 'q.life_time';
+
+            const animations = {
+                spin: { comment: '### Animation: Spin ###', code: `playanimation @e[tag=${tag}] animation.player.attack.positions none 0 "v.yrot=(${t}*50)%360;" wiki.anim_spin` },
+                bob: { comment: '### Animation: Bob ###', code: `playanimation @e[tag=${tag}] animation.player.attack.positions none 0 "v.ypos=${state.ypos}+math.sin(${t}*2)*8;" wiki.anim_bob` },
+                pulse: { comment: '### Animation: Pulse ###', code: `playanimation @e[tag=${tag}] animation.player.attack.positions none 0 "v.scale=${state.scale}+math.sin(${t}*3)*0.3;" wiki.anim_pulse` },
+                wobble: { comment: '### Animation: Wobble ###', code: `playanimation @e[tag=${tag}] animation.player.attack.positions none 0 "v.xrot=${state.xrot}+math.sin(${t}*4)*15;v.zrot=${state.zrot}+math.cos(${t}*3)*10;" wiki.anim_wobble` },
+                orbit: { comment: '### Animation: Orbit ###', code: `playanimation @e[tag=${tag}] animation.player.attack.positions none 0 "v.yrot=(${t}*50)%360;" wiki.anim_orbit` },
+                float: { comment: '### Animation: Float ###', code: `playanimation @e[tag=${tag}] animation.player.attack.positions none 0 "v.ypos=${state.ypos}+math.sin(${t})*6;v.zrot=${state.zrot}+math.sin(${t}*0.5)*5;" wiki.anim_float` },
+                shake: { comment: '### Animation: Shake ###', code: `playanimation @e[tag=${tag}] animation.player.attack.positions none 0 "v.xrot=${state.xrot}+math.sin(${t}*20)*5;v.yrot=${state.yrot}+math.cos(${t}*15)*5;v.zrot=${state.zrot}+math.sin(${t}*18)*3;" wiki.anim_shake` }
+            };
+
+            return state.preset !== 'none' && animations[state.preset] ? [animations[state.preset]] : [];
+        }
+
+        function generateStopSoundCommands() {
+            const sounds = ['mob.fox.spit', 'mob.fox.sniff', 'mob.fox.sleep', 'mob.fox.screech', 'mob.fox.hurt', 'mob.fox.eat', 'mob.fox.death', 'mob.fox.bite', 'mob.fox.ambient', 'mob.fox.aggro'];
+            return [
+                { comment: '### Stop fox sounds (optional) ###', code: '' },
+                ...sounds.map(s => ({ comment: '', code: `stopsound @a ${s}` }))
+            ];
+        }
+
+        function generateCommands() {
+            let commands = generateSimplifiedCommands();
+            commands = commands.concat(generateAnimationCommands());
+            return commands.concat(generateStopSoundCommands());
+        }
+
+        function getCommandsText() {
+            return generateCommands()
+                .filter(cmd => cmd.code)
+                .map(cmd => cmd.comment ? `${cmd.comment}\n${cmd.code}` : cmd.code)
+                .join('\n\n');
+        }
+
+        function updateOutput() {
+            const commands = generateCommands();
+            const output = commands.map(cmd => {
+                if (!cmd.code) return cmd.comment ? `<div class="command-comment">${cmd.comment}</div>` : '';
+                return `<div class="command-line">
+                    ${cmd.comment ? `<div class="command-comment">${cmd.comment}</div>` : ''}
+                    <div class="command-code">${escapeHtml(cmd.code)}</div>
+                </div>`;
+            }).filter(Boolean).join('');
+
+            elements.commandOutput.innerHTML = output;
+            updateExplanation();
+            updateValueOverlay();
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function updateExplanation() {
+            const explanations = [
+                `<p><span class="tag">Simplified</span> This compressed version uses only <strong>2 playanimation commands</strong> instead of 10+.</p>`,
+                `<p><code>summon fox</code>: Creates the fox entity that serves as the FMBE base.</p>`,
+                `<p><code>replaceitem entity</code>: Places the item/block in the fox's main hand.</p>`,
+                `<p><strong>Command [1]</strong>: Initializes variables using <code>q.life_time*0</code> to reset rotation values.</p>`,
+                `<p><strong>Command [2]</strong>: Calculates position and rotation transformations in one command.</p>`
+            ];
+
+            if (state.preset !== 'none') {
+                explanations.push(`<p><span class="tag">${state.preset}</span> Animation command using <code>q.life_time</code>.</p>`);
+            }
+
+            elements.explanationSection.innerHTML = `
+                <h4><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>About Simplified FMBE</h4>
+                ${explanations.join('')}
+            `;
+        }
+
+        function updateValueOverlay() {
+            // Create individual editable badges so clicking them updates the related value
+            elements.valueOverlay.innerHTML = `
+                <div class="value-badge" data-key="xpos"><span class="label">X:</span><span class="value">${animState.xpos.toFixed(0)}</span></div>
+                <div class="value-badge" data-key="ypos"><span class="label">Y:</span><span class="value">${animState.ypos.toFixed(0)}</span></div>
+                <div class="value-badge" data-key="zpos"><span class="label">Z:</span><span class="value">${animState.zpos.toFixed(0)}</span></div>
+
+                <div class="value-badge" data-key="xrot"><span class="label">Rx:</span><span class="value">${animState.xrot.toFixed(0)}</span></div>
+                <div class="value-badge" data-key="yrot"><span class="label">Ry:</span><span class="value">${animState.yrot.toFixed(0)}</span></div>
+                <div class="value-badge" data-key="zrot"><span class="label">Rz:</span><span class="value">${animState.zrot.toFixed(0)}</span></div>
+
+                <div class="value-badge" data-key="scale"><span class="label">Scale:</span><span class="value">${animState.scale.toFixed(2)}</span></div>
+
+                <div class="value-badge" data-key="xbasepos"><span class="label">Bx:</span><span class="value">${state.xbasepos}</span></div>
+                <div class="value-badge" data-key="ybasepos"><span class="label">By:</span><span class="value">${state.ybasepos}</span></div>
+                <div class="value-badge" data-key="zbasepos"><span class="label">Bz:</span><span class="value">${state.zbasepos}</span></div>
+            `;
+        }
+
+        function handleValueBadgeClick(e) {
+            // Only trigger inline edit when the actual value text is clicked
+            const valueSpan = e.target.closest('.value');
+            const badge = e.target.closest('.value-badge');
+            if (!badge || !valueSpan) return;
+            const key = badge.dataset.key;
+            if (!key) return;
+
+            // Prevent creating multiple inputs
+            if (badge.querySelector('input.value-input')) return;
+
+            const current = (key in state) ? state[key] : (animState[key] !== undefined ? animState[key] : 0);
+            const input = document.createElement('input');
+            input.type = 'number';
+            input.className = 'value-input';
+            input.step = (key === 'scale') ? '0.01' : '1';
+            input.value = String(current);
+            badge.appendChild(input);
+            valueSpan.style.display = 'none';
+            input.focus();
+            input.select();
+
+            function cleanup() {
+                if (input.parentNode) input.parentNode.removeChild(input);
+                valueSpan.style.display = '';
+            }
+
+            function commit() {
+                const v = input.value.trim();
+                const num = parseFloat(v);
+                if (isNaN(num)) {
+                    alert('Please enter a valid number');
+                    cleanup();
+                    return;
+                }
+                state[key] = num;
+                if (elements[key]) elements[key].value = num;
+                if (valueDisplays[key]) valueDisplays[key].textContent = (key === 'scale') ? num.toFixed(1) : num;
+                state.animationTime = 0;
+                updateOutput();
+                cleanup();
+            }
+
+            input.addEventListener('keydown', (ev) => {
+                if (ev.key === 'Enter') commit();
+                else if (ev.key === 'Escape') cleanup();
+            });
+
+            input.addEventListener('blur', commit);
+        }
+
+        function applyAnimationPreset(time) {
+            animState.xpos = state.xpos;
+            animState.ypos = state.ypos;
+            animState.zpos = state.zpos;
+            animState.xrot = state.xrot;
+            animState.yrot = state.yrot;
+            animState.zrot = state.zrot;
+            animState.scale = state.scale;
+
+            switch (state.preset) {
+                case 'spin':
+                    animState.yrot = state.yrot + (time * 50) % 360;
+                    break;
+                case 'bob':
+                    animState.ypos = state.ypos + Math.sin(time * 2) * 8;
+                    break;
+                case 'pulse':
+                    animState.scale = state.scale + Math.sin(time * 3) * 0.3;
+                    break;
+                case 'wobble':
+                    animState.xrot = state.xrot + Math.sin(time * 4) * 15;
+                    animState.zrot = state.zrot + Math.cos(time * 3) * 10;
+                    break;
+                case 'orbit':
+                    // Keep base position intact; simulate orbit by rotating instead of translating
+                    animState.xpos = state.xpos;
+                    animState.zpos = state.zpos;
+                    animState.yrot = state.yrot + (time * 50) % 360;
+                    break;
+                case 'float':
+                    animState.ypos = state.ypos + Math.sin(time) * 6;
+                    animState.zrot = state.zrot + Math.sin(time * 0.5) * 5;
+                    break;
+                case 'shake':
+                    animState.xrot = state.xrot + Math.sin(time * 20) * 5;
+                    animState.yrot = state.yrot + Math.cos(time * 15) * 5;
+                    animState.zrot = state.zrot + Math.sin(time * 18) * 3;
+                    break;
+            }
+        }
+
+        function updatePreview() {
+            const previewScale = animState.scale;
+            const itemName = state.itemId.replace('minecraft:', '');
+
+            const transform = `
+                rotateX(${animState.xrot}deg)
+                rotateY(${animState.yrot}deg)
+                rotateZ(${animState.zrot}deg)
+                translateX(calc(-50% + ${animState.xpos}px))
+                translateY(calc(-50% - ${animState.ypos}px))
+                translateZ(${animState.zpos}px)
+                scale3d(${previewScale}, ${previewScale}, ${previewScale})
+                rotateX(${state.viewRotation.x}deg)
+                rotateY(${state.viewRotation.y}deg)
+            `;
+
+            elements.previewBlock.style.transform = transform;
+
+            elements.previewBlock.querySelectorAll('.block-face').forEach(face => {
+                face.textContent = face.classList.contains('top') || face.classList.contains('front') ? itemName : face.classList[1];
+            });
+
+            if (state.preset !== 'none') {
+                elements.animationIndicator.classList.add('visible');
+                elements.animationName.textContent = state.preset;
+                elements.previewDot.classList.add('animated');
+                elements.previewStatus.textContent = 'Animation Active';
+            } else {
+                elements.animationIndicator.classList.remove('visible');
+                elements.previewDot.classList.remove('animated');
+                elements.previewStatus.textContent = 'Real-time Preview';
+            }
+
+            updateValueOverlay();
+        }
+
+        function startAnimationLoop() {
+            let lastTime = 0;
+
+            function animate(currentTime) {
+                const deltaTime = (currentTime - lastTime) / 1000;
+                lastTime = currentTime;
+
+                if (state.preset !== 'none') {
+                    state.animationTime += deltaTime;
+                } else {
+                    state.animationTime = 0;
+                }
+
+                applyAnimationPreset(state.animationTime);
+
+                if (state.autoRotate) {
+                    state.viewRotation.y += 0.5;
+                }
+
+                updatePreview();
+                requestAnimationFrame(animate);
+            }
+
+            requestAnimationFrame(animate);
+        }
+
+        function resetAllValues() {
+            Object.keys(defaults).forEach(key => {
+                state[key] = defaults[key];
+                if (elements[key]) {
+                    elements[key].value = defaults[key];
+                }
+                if (valueDisplays[key]) {
+                    valueDisplays[key].textContent = key === 'scale' ? defaults[key].toFixed(1) : defaults[key];
+                }
+            });
+
+            document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+            document.querySelector('.preset-btn[data-preset="none"]').classList.add('active');
+
+            updateOutput();
+        }
+
+        function bindEvents() {
+            document.querySelectorAll('.preset-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    state.preset = btn.dataset.preset;
+                    state.animationTime = 0;
+                    updateOutput();
+                });
+            });
+
+            Object.keys(valueDisplays).forEach(key => {
+                const input = elements[key];
+                const display = valueDisplays[key];
+
+                if (input) {
+                    input.addEventListener('input', () => {
+                        const value = parseFloat(input.value);
+                        state[key] = value;
+                        display.textContent = key === 'scale' ? value.toFixed(1) : value;
+                        updateOutput();
+                    });
+                }
+            });
+
+            ['entityTag', 'itemId'].forEach(key => {
+                if (elements[key]) {
+                    elements[key].addEventListener('input', () => {
+                        state[key] = elements[key].value;
+                        updateOutput();
+                    });
+                }
+            });
+
+            elements.copyBtn.addEventListener('click', async () => {
+                try {
+                    await navigator.clipboard.writeText(getCommandsText());
+                    elements.copyBtn.classList.add('copied');
+                    elements.copyBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Copied!`;
+                    setTimeout(() => {
+                        elements.copyBtn.classList.remove('copied');
+                        elements.copyBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy`;
+                    }, 2000);
+                } catch (err) {
+                    console.error('Failed to copy:', err);
+                }
+            });
+
+            elements.downloadBtn.addEventListener('click', () => {
+                const content = getCommandsText();
+                const filename = state.entityTag.replace(':', '_') + '.mcfunction';
+                const blob = new Blob([content], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            });
+
+            elements.resetAll.addEventListener('click', resetAllValues);
+
+            elements.resetView.addEventListener('click', () => {
+                state.viewRotation = { x: -20, y: 45 };
+            });
+
+            elements.toggleSpin.addEventListener('click', () => {
+                state.autoRotate = !state.autoRotate;
+                elements.playIcon.style.display = state.autoRotate ? 'none' : 'block';
+                elements.pauseIcon.style.display = state.autoRotate ? 'block' : 'none';
+                elements.toggleSpin.classList.toggle('active', state.autoRotate);
+            });
+
+            let isDragging = false;
+            let lastPos = { x: 0, y: 0 };
+
+            elements.previewContainer.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                lastPos = { x: e.clientX, y: e.clientY };
+                elements.previewContainer.style.cursor = 'grabbing';
+            });
+
+            document.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                const deltaX = e.clientX - lastPos.x;
+                const deltaY = e.clientY - lastPos.y;
+                state.viewRotation.y += deltaX * 0.5;
+                state.viewRotation.x = Math.max(-90, Math.min(90, state.viewRotation.x - deltaY * 0.5));
+                lastPos = { x: e.clientX, y: e.clientY };
+            });
+
+            document.addEventListener('mouseup', () => {
+                isDragging = false;
+                elements.previewContainer.style.cursor = 'grab';
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+
+</html>
