@@ -1325,8 +1325,8 @@
                                 <line x1="12" y1="16" x2="12" y2="12" />
                                 <line x1="12" y1="8" x2="12.01" y2="8" />
                             </svg>
-                            <p>Animation presets are previewed in real-time above! The generated commands use
-                                <code>q.life_time</code> for continuous motion.</p>
+                            <p>Animation presets are previewed in real-time above! Click multiple buttons to combine
+                                effects while keeping the base FMBE commands intact.</p>
                         </div>
                     </div>
                 </div>
@@ -1447,7 +1447,7 @@
     <script>
         // Default values
         const defaults = {
-            preset: 'none',
+            preset: [],
             commandPreset: 'simplified',
             entityTag: 'wiki:fmbe',
             itemId: 'minecraft:stone',
@@ -1567,6 +1567,14 @@
             ];
         }
 
+        function getSelectedPresets() {
+            if (Array.isArray(state.preset)) {
+                return state.preset.filter(Boolean);
+            }
+
+            return state.preset && state.preset !== 'none' ? [state.preset] : [];
+        }
+
         function generateAnimationCommands() {
             const tag = state.entityTag;
             const t = 'q.life_time';
@@ -1581,7 +1589,8 @@
                 shake: { comment: '### Animation: Shake ###', code: `playanimation @e[tag=${tag}] animation.player.attack.positions none 0 "v.xrot=${state.xrot}+math.sin(${t}*20)*5;v.yrot=${state.yrot}+math.cos(${t}*15)*5;v.zrot=${state.zrot}+math.sin(${t}*18)*3;" wiki.anim_shake` }
             };
 
-            return state.preset !== 'none' && animations[state.preset] ? [animations[state.preset]] : [];
+            const selectedPresets = getSelectedPresets();
+            return selectedPresets.map(preset => animations[preset]).filter(Boolean);
         }
 
         function generateStopSoundCommands() {
@@ -1639,8 +1648,10 @@
                 `<p><strong>Command [3]</strong>: Calculates the final position and rotation values for the display entity.</p>`
             ];
 
-            if (state.preset !== 'none') {
-                explanations.push(`<p><span class="tag">${state.preset}</span> Animation command using <code>q.life_time</code>.</p>`);
+            const selectedPresets = getSelectedPresets();
+            if (selectedPresets.length) {
+                const presetLabel = selectedPresets.join(' + ');
+                explanations.push(`<p><span class="tag">${presetLabel}</span> Animation commands using <code>q.life_time</code>.</p>`);
             }
 
             elements.explanationSection.innerHTML = `
@@ -1728,36 +1739,37 @@
             animState.zrot = state.zrot;
             animState.scale = state.scale;
 
-            switch (state.preset) {
-                case 'spin':
-                    animState.yrot = state.yrot + (time * 50) % 360;
-                    break;
-                case 'bob':
-                    animState.ypos = state.ypos + Math.sin(time * 2) * 8;
-                    break;
-                case 'pulse':
-                    animState.scale = state.scale + Math.sin(time * 3) * 0.3;
-                    break;
-                case 'wobble':
-                    animState.xrot = state.xrot + Math.sin(time * 4) * 15;
-                    animState.zrot = state.zrot + Math.cos(time * 3) * 10;
-                    break;
-                case 'orbit':
-                    // Keep base position intact; simulate orbit by rotating instead of translating
-                    animState.xpos = state.xpos;
-                    animState.zpos = state.zpos;
-                    animState.yrot = state.yrot + (time * 50) % 360;
-                    break;
-                case 'float':
-                    animState.ypos = state.ypos + Math.sin(time) * 6;
-                    animState.zrot = state.zrot + Math.sin(time * 0.5) * 5;
-                    break;
-                case 'shake':
-                    animState.xrot = state.xrot + Math.sin(time * 20) * 5;
-                    animState.yrot = state.yrot + Math.cos(time * 15) * 5;
-                    animState.zrot = state.zrot + Math.sin(time * 18) * 3;
-                    break;
-            }
+            getSelectedPresets().forEach(presetName => {
+                switch (presetName) {
+                    case 'spin':
+                        animState.yrot = state.yrot + (time * 50) % 360;
+                        break;
+                    case 'bob':
+                        animState.ypos = state.ypos + Math.sin(time * 2) * 8;
+                        break;
+                    case 'pulse':
+                        animState.scale = state.scale + Math.sin(time * 3) * 0.3;
+                        break;
+                    case 'wobble':
+                        animState.xrot = state.xrot + Math.sin(time * 4) * 15;
+                        animState.zrot = state.zrot + Math.cos(time * 3) * 10;
+                        break;
+                    case 'orbit':
+                        animState.xpos = state.xpos;
+                        animState.zpos = state.zpos;
+                        animState.yrot = state.yrot + (time * 50) % 360;
+                        break;
+                    case 'float':
+                        animState.ypos = state.ypos + Math.sin(time) * 6;
+                        animState.zrot = state.zrot + Math.sin(time * 0.5) * 5;
+                        break;
+                    case 'shake':
+                        animState.xrot = state.xrot + Math.sin(time * 20) * 5;
+                        animState.yrot = state.yrot + Math.cos(time * 15) * 5;
+                        animState.zrot = state.zrot + Math.sin(time * 18) * 3;
+                        break;
+                }
+            });
         }
 
         function updatePreview() {
@@ -1782,11 +1794,12 @@
                 face.textContent = face.classList.contains('top') || face.classList.contains('front') ? itemName : face.classList[1];
             });
 
-            if (state.preset !== 'none') {
+            const selectedPresets = getSelectedPresets();
+            if (selectedPresets.length) {
                 elements.animationIndicator.classList.add('visible');
-                elements.animationName.textContent = state.preset;
+                elements.animationName.textContent = selectedPresets.join(' + ');
                 elements.previewDot.classList.add('animated');
-                elements.previewStatus.textContent = 'Animation Active';
+                elements.previewStatus.textContent = 'Animations Active';
             } else {
                 elements.animationIndicator.classList.remove('visible');
                 elements.previewDot.classList.remove('animated');
@@ -1803,7 +1816,7 @@
                 const deltaTime = (currentTime - lastTime) / 1000;
                 lastTime = currentTime;
 
-                if (state.preset !== 'none') {
+                if (getSelectedPresets().length) {
                     state.animationTime += deltaTime;
                 } else {
                     state.animationTime = 0;
@@ -1833,8 +1846,10 @@
                 }
             });
 
-            document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
-            document.querySelector('.preset-btn[data-preset="none"]').classList.add('active');
+            document.querySelectorAll('.preset-btn[data-preset]').forEach(b => {
+                b.classList.toggle('active', b.dataset.preset === 'none');
+            });
+            state.preset = [];
 
             updateOutput();
         }
@@ -1842,9 +1857,26 @@
         function bindEvents() {
             document.querySelectorAll('.preset-btn[data-preset]').forEach(btn => {
                 btn.addEventListener('click', () => {
-                    document.querySelectorAll('.preset-btn[data-preset]').forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    state.preset = btn.dataset.preset;
+                    const presetName = btn.dataset.preset;
+                    const selected = Array.isArray(state.preset) ? [...state.preset] : [];
+
+                    if (presetName === 'none') {
+                        state.preset = [];
+                    } else {
+                        const index = selected.indexOf(presetName);
+                        if (index >= 0) {
+                            selected.splice(index, 1);
+                        } else {
+                            selected.push(presetName);
+                        }
+                        state.preset = selected;
+                    }
+
+                    document.querySelectorAll('.preset-btn[data-preset]').forEach(b => {
+                        const isNone = b.dataset.preset === 'none';
+                        b.classList.toggle('active', isNone ? state.preset.length === 0 : state.preset.includes(b.dataset.preset));
+                    });
+
                     state.animationTime = 0;
                     updateOutput();
                 });
