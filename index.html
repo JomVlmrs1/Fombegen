@@ -466,6 +466,10 @@
             gap: 0.75rem;
         }
 
+        .command-preset-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
         @media (max-width: 600px) {
             .preset-grid {
                 grid-template-columns: repeat(2, 1fr);
@@ -1212,6 +1216,18 @@
                             </div>
                         </div>
 
+                        <div class="form-section">
+                            <div class="form-section-title">Output Preset</div>
+                            <div class="preset-grid command-preset-grid">
+                                <button class="preset-btn active" data-command-preset="simplified">
+                                    Simplified
+                                </button>
+                                <button class="preset-btn" data-command-preset="full">
+                                    Full
+                                </button>
+                            </div>
+                        </div>
+
                         <div class="btn-row">
                             <button class="reset-btn" id="resetAll">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1432,6 +1448,7 @@
         // Default values
         const defaults = {
             preset: 'none',
+            commandPreset: 'simplified',
             entityTag: 'wiki:fmbe',
             itemId: 'minecraft:stone',
             xpos: 0, ypos: 0, zpos: 0,
@@ -1485,21 +1502,68 @@
             }
         }
 
+        function formatMolangNumber(value) {
+            const rounded = Number(value).toFixed(Math.abs(value) % 1 === 0 ? 0 : 3);
+            return rounded.replace(/\.0+$|(?<=\.\d*?)0+$/g, '');
+        }
+
         function generateSimplifiedCommands() {
             const tag = state.entityTag;
-            const s = state.scale.toFixed(1);
+            const scale = formatMolangNumber(state.scale);
+            const xbase = formatMolangNumber(state.xbasepos);
+            const ybase = formatMolangNumber(state.ybasepos);
+            const zbase = formatMolangNumber(state.zbasepos);
+            const xpos = formatMolangNumber(state.xpos);
+            const ypos = formatMolangNumber(state.ypos);
+            const zpos = formatMolangNumber(state.zpos);
+            const xrot = formatMolangNumber(state.xrot);
+            const yrot = formatMolangNumber(state.yrot);
+            const zrot = formatMolangNumber(state.zrot);
 
-            const cmd1 = `playanimation @e[tag=${tag}] animation.player.sleeping none 0 "v.scale=${s};v.adscale=math.sqrt(v.scale);v.adscaled=2.1385*v.adscale;v.xbasepos=${state.xbasepos};v.ybasepos=${state.ybasepos};v.zbasepos=${state.zbasepos};v.xpos=${state.xpos};v.ypos=${state.ypos};v.zpos=${state.zpos};v.xrot=q.life_time*0+${state.xrot};v.yrot=q.life_time*0+${state.yrot};v.zrot=q.life_time*0+${state.zrot};v.swelling_scale1=v.adscaled;v.swelling_scale2=v.adscaled;" controller.animation.fox.move`;
+            const cmdReposition = `playanimation @e[tag=${tag}] animation.player.sleeping none 0 "" controller.animation.fox.move`;
 
-            const cmd2 = `playanimation @e[tag=${tag}] animation.ender_dragon.neck_head_movement none 0 "v.adjust_xz=8*v.adscaled+v.zbasepos/v.adscaled;v.adjust_y=(-5-v.ybasepos/v.adscaled/v.adscaled)*v.adscaled;v.x=v.xbasepos/v.adscaled;v.y=v.adjust_y;v.z=v.adjust_xz;v.ty=v.y*math.cos(v.xrot)-v.z*math.sin(v.xrot);v.tz=v.y*math.sin(v.xrot)+v.z*math.cos(v.xrot);v.y=v.ty;v.z=v.tz;v.tx=-v.x*math.cos(v.zrot)+v.y*math.sin(v.zrot);v.ty=v.x*math.sin(v.zrot)+v.y*math.cos(v.zrot);v.x=v.tx;v.y=v.ty;v.tx=v.x*math.cos(v.yrot)+v.z*math.sin(v.yrot);v.tz=-v.x*math.sin(v.yrot)+v.z*math.cos(v.yrot);v.x=v.tx;v.z=v.tz;v.head_position_x=v.x+v.xpos/v.adscaled;v.head_position_y=7.48/v.adscale+v.z+v.zpos/v.adscaled;v.head_position_z=v.y-v.ypos/v.adscaled;v.head_rotation_x=90+v.xrot;v.head_rotation_y=v.zrot;v.head_rotation_z=v.yrot;" wiki.posrot`;
+            const cmdScale = `playanimation @e[tag=${tag}] animation.creeper.swelling none 0 "v.scale=${scale};v.adscale=math.sqrt(v.scale);v.adscaled=2.1385*v.adscale;v.xbasepos=${xbase};v.ybasepos=${ybase};v.zbasepos=${zbase};v.xpos=${xpos};v.ypos=${ypos};v.zpos=${zpos};v.xrot=${xrot};v.yrot=${yrot};v.zrot=${zrot};v.swelling_scale1=v.adscaled;v.swelling_scale2=v.adscaled;" wiki.scale`;
+
+            const cmdPosRot = `playanimation @e[tag=${tag}] animation.ender_dragon.neck_head_movement none 0 "v.adjust_xz=8*v.adscaled+v.zbasepos/v.adscaled;v.adjust_y=(-5-v.ybasepos/v.adscaled/v.adscaled)*v.adscaled;v.x=v.xbasepos/v.adscaled;v.y=v.adjust_y;v.z=v.adjust_xz;v.ty=v.y*math.cos(v.xrot)-v.z*math.sin(v.xrot);v.tz=v.y*math.sin(v.xrot)+v.z*math.cos(v.xrot);v.y=v.ty;v.z=v.tz;v.tx=-v.x*math.cos(v.zrot)+v.y*math.sin(v.zrot);v.ty=v.x*math.sin(v.zrot)+v.y*math.cos(v.zrot);v.x=v.tx;v.y=v.ty;v.tx=v.x*math.cos(v.yrot)+v.z*math.sin(v.yrot);v.tz=-v.x*math.sin(v.yrot)+v.z*math.cos(v.yrot);v.x=v.tx;v.z=v.tz;v.head_position_x=v.x+v.xpos/v.adscaled;v.head_position_y=7.48/v.adscale+v.z+v.zpos/v.adscaled;v.head_position_z=v.y-v.ypos/v.adscaled;v.head_rotation_x=90+v.xrot;v.head_rotation_y=v.zrot;v.head_rotation_z=v.yrot;" wiki.posrot`;
 
             return [
-                { comment: '### Summon the FMBE entity (fox) ###', code: `summon fox ~~~` },
-                { comment: '### Tag the summoned fox so later commands target it reliably ###', code: `tag @e[name="${tag}"] add ${tag}` },
-                { comment: '### Teleport the tagged fox to the summon location ###', code: `execute as @e[tag=${tag}] at @s run tp @s ~~~` },
-                { comment: '### Set the item/block model in fox main hand ###', code: `replaceitem entity @e[tag=${tag}] slot.weapon.mainhand 0 ${state.itemId}` },
-                { comment: '### [1] Initialize FMBE variables and scale ###', code: cmd1 },
-                { comment: '### [2] Define FMBE position & rotation ###', code: cmd2 }
+                { comment: '### Reposition and Define FMBE Scale ###', code: cmdReposition },
+                { comment: '', code: cmdScale },
+                { comment: '### Define FMBE Position & Rotation ###', code: cmdPosRot }
+            ];
+        }
+
+        function generateFullCommands() {
+            const tag = state.entityTag;
+            const scale = formatMolangNumber(state.scale);
+            const xbase = formatMolangNumber(state.xbasepos);
+            const ybase = formatMolangNumber(state.ybasepos);
+            const zbase = formatMolangNumber(state.zbasepos);
+            const xpos = formatMolangNumber(state.xpos);
+            const ypos = formatMolangNumber(state.ypos);
+            const zpos = formatMolangNumber(state.zpos);
+            const xrot = formatMolangNumber(state.xrot);
+            const yrot = formatMolangNumber(state.yrot);
+            const zrot = formatMolangNumber(state.zrot);
+
+            const cmdReposition = `playanimation @e[tag=${tag}] animation.player.sleeping none 0 "" controller.animation.fox.move`;
+            const cmdScale = `playanimation @e[tag=${tag}] animation.creeper.swelling none 0 "v.xbasepos=${xbase};v.ybasepos=${ybase};v.zbasepos=${zbase};v.xpos=${xpos};v.ypos=${ypos};v.zpos=${zpos};v.xrot=${xrot};v.yrot=${yrot};v.zrot=${zrot};v.scale=${scale};v.xzscale=${scale};v.yscale=${scale};v.swelling_scale1=2.1385*math.sqrt(v.xzscale*v.scale);v.swelling_scale2=2.1385*math.sqrt(v.yscale*v.scale);" wiki.scale`;
+            const cmdShiftPos = `playanimation @e[tag=${tag}] animation.ender_dragon.neck_head_movement none 0 "v.head_rotation_x=0;v.head_rotation_y=0;v.head_rotation_z=0;v.head_position_x=(v.xbasepos*0.433875)*math.sqrt(v.xzscale*v.scale);v.head_position_y=(10.05185375+v.ybasepos*0.467625)*math.sqrt(v.yscale*v.scale);v.head_position_z=(17.108-v.zbasepos*0.433875)*math.sqrt(v.xzscale*v.scale);" wiki.shift_pos`;
+            const cmdXRot = `playanimation @e[tag=${tag}] animation.warden.move none 0 "v.body_x_rot=90+v.xrot;v.body_z_rot=90+v.yrot;" wiki.xrot`;
+            const cmdZRot = `playanimation @e[tag=${tag}] animation.player.attack.rotations none 0 "v.attack_body_rot_y=-v.zrot;" wiki.zrot`;
+            const cmdXPos = `playanimation @e[tag=${tag}] animation.parrot.moving none 0 "v.wing_flap=(16-v.xpos)*3.3333333;" wiki.xpos`;
+            const cmdYPos = `playanimation @e[tag=${tag}] animation.minecart.move.v1.0 none 0 "v.rail_offset.x=0;v.rail_offset.y=1.6485+v.ypos/16;v.rail_offset.z=0;" wiki.ypos`;
+            const cmdZPos = `playanimation @e[tag=${tag}] animation.parrot.dance none 0 "v.dance.x=-v.zpos;v.dance.y=0;" wiki.zpos`;
+
+            return [
+                { comment: '### Reposition and Define FMBE Scale ###', code: cmdReposition },
+                { comment: '', code: cmdScale },
+                { comment: '### Define FMBE Position & Rotation ###', code: cmdShiftPos },
+                { comment: '### Define FMBE Rotation ###', code: cmdXRot },
+                { comment: '', code: cmdZRot },
+                { comment: '### Define FMBE Position ###', code: cmdXPos },
+                { comment: '', code: cmdYPos },
+                { comment: '', code: cmdZPos }
             ];
         }
 
@@ -1529,15 +1593,19 @@
         }
 
         function generateCommands() {
-            let commands = generateSimplifiedCommands();
+            const baseCommands = state.commandPreset === 'full' ? generateFullCommands() : generateSimplifiedCommands();
+            let commands = baseCommands;
             commands = commands.concat(generateAnimationCommands());
             return commands.concat(generateStopSoundCommands());
         }
 
         function getCommandsText() {
             return generateCommands()
-                .filter(cmd => cmd.code)
-                .map(cmd => cmd.comment ? `${cmd.comment}\n${cmd.code}` : cmd.code)
+                .filter(cmd => cmd.code || cmd.comment)
+                .map(cmd => {
+                    if (!cmd.code) return cmd.comment;
+                    return cmd.comment ? `${cmd.comment}\n${cmd.code}` : cmd.code;
+                })
                 .join('\n\n');
         }
 
@@ -1563,12 +1631,12 @@
         }
 
         function updateExplanation() {
+            const presetLabel = state.commandPreset === 'full' ? 'full wiki-style' : 'simplified';
             const explanations = [
-                `<p><span class="tag">Simplified</span> This compressed version uses only <strong>2 playanimation commands</strong> instead of 10+.</p>`,
-                `<p><code>summon fox</code>: Creates the fox entity that serves as the FMBE base.</p>`,
-                `<p><code>replaceitem entity</code>: Places the item/block in the fox's main hand.</p>`,
-                `<p><strong>Command [1]</strong>: Initializes variables using <code>q.life_time*0</code> to reset rotation values.</p>`,
-                `<p><strong>Command [2]</strong>: Calculates position and rotation transformations in one command.</p>`
+                `<p><span class="tag">Bedrock wiki</span> The generated output follows the ${presetLabel} FMBE command pattern from the Bedrock wiki.</p>`,
+                `<p><strong>Command [1]</strong>: Repositions the entity and prepares the FMBE controller state.</p>`,
+                `<p><strong>Command [2]</strong>: Initializes the scale and base-position variables used by the FMBE transform.</p>`,
+                `<p><strong>Command [3]</strong>: Calculates the final position and rotation values for the display entity.</p>`
             ];
 
             if (state.preset !== 'none') {
@@ -1772,12 +1840,21 @@
         }
 
         function bindEvents() {
-            document.querySelectorAll('.preset-btn').forEach(btn => {
+            document.querySelectorAll('.preset-btn[data-preset]').forEach(btn => {
                 btn.addEventListener('click', () => {
-                    document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+                    document.querySelectorAll('.preset-btn[data-preset]').forEach(b => b.classList.remove('active'));
                     btn.classList.add('active');
                     state.preset = btn.dataset.preset;
                     state.animationTime = 0;
+                    updateOutput();
+                });
+            });
+
+            document.querySelectorAll('.preset-btn[data-command-preset]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.preset-btn[data-command-preset]').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    state.commandPreset = btn.dataset.commandPreset;
                     updateOutput();
                 });
             });
